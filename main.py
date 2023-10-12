@@ -1,6 +1,11 @@
 from config.config import HOST, USER, PASSWORD, DATABASE
 import pymysql.cursors
+from flask import Flask, render_template
 
+
+app = Flask(__name__)
+
+@app.route("/")
 def mysqlconnect():
     connection = pymysql.connect(
         host=HOST,
@@ -10,18 +15,16 @@ def mysqlconnect():
         cursorclass=pymysql.cursors.DictCursor
     )
     
-    # Using a with-statement ensures that the connection is properly closed after its suite finishes
     with connection:
         with connection.cursor() as cursor:
-            # Query to retrieve all table names from the current database
             query = "SHOW TABLES"
             cursor.execute(query)
             
             tables = cursor.fetchall()
             
-            # Print each table name
             for table in tables:
                 print(table['Tables_in_' + DATABASE])
+    return render_template("index.html", tables=tables)
 
 if __name__ == "__main__":
-    mysqlconnect()
+    app.run(host='127.0.0.1', port=5500, debug=True)
